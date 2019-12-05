@@ -1,5 +1,19 @@
-# bitcoin-blockchain-parser [![Build Status](https://travis-ci.org/alecalve/python-bitcoin-blockchain-parser.svg?branch=master)](https://travis-ci.org/alecalve/python-bitcoin-blockchain-parser) [![Coverage Status](https://coveralls.io/repos/alecalve/python-bitcoin-blockchain-parser/badge.svg?branch=master&service=github)](https://coveralls.io/github/alecalve/python-bitcoin-blockchain-parser?branch=master)
-This Python 3 library provides a parser for the raw data stored by bitcoind. 
+# bitcoin-blockchain-parser (Multicore enabled)
+
+This Python 3 library is a fork of the [bitcoin-blockchain-parser](https://github.com/alecalve/python-bitcoin-blockchain-parser)
+which provides a parser for the raw data stored by bitcoind. In contrast to the original library, this fork allows 
+processes to read the lockchain data in parallel. This is particularly useful if you want to parallelize your analysis 
+across multiple CPU cores. 
+
+**NOTE:** The database used by bitcoind (LevelDB) does not support multi-process concurrency. To "solve" that problem,
+a temporary directory is created and symbolically linked to the data files for every process. Thus, each process can
+acquire a lock for his own temporary directory and simultaneous reads become possible (see 
+[this Stackoverflow-Answer](https://stackoverflow.com/a/23540423) for details). However, this is a terrible hack that
+will introduce significant instability to your code and it should **NEVER** be used in any productive environments.
+In particular, any attempt to perform parallel writes will result in unexpected and unpredictable behaviour and most 
+likely cause data corruption.
+
+**This library will only work on Linux!** 
 
 ## Features
 - Detects outputs types
@@ -7,6 +21,7 @@ This Python 3 library provides a parser for the raw data stored by bitcoind.
 - Interprets scripts
 - Supports SegWit
 - Supports ordered block parsing
+- Support parallel block parsing
 
 ## Examples
 
