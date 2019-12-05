@@ -15,6 +15,7 @@ import struct
 import pickle
 import stat
 import plyvel
+import tempfile
 
 from .block import Block
 from .index import DBBlockIndex
@@ -78,10 +79,11 @@ class Blockchain(object):
     maintained by bitcoind.
     """
 
-    def __init__(self, path):
+    def __init__(self, path, ignoreLocks=False):
         self.path = path
         self.blockIndexes = None
         self.indexPath = None
+        self.ignoreLocks = ignoreLocks
 
     def get_unordered_blocks(self):
         """Yields the blocks contained in the .blk files as is,
@@ -97,7 +99,27 @@ class Blockchain(object):
         This function also provides caching of indexes.
         """
         if self.indexPath != index:
-            db = plyvel.DB(index, compression=None)
+
+            # If ignoreLocks = True this will bypass the read locks of bitcoinds LevelDB.
+            # See: https://stackoverflow.com/a/23540423
+            #
+            # THIS IS A TERRIBLE HACK THAT REALLY SHOULDN'T HAVE WORKED IN THE FIRST PLACE.
+            # NEVER EVER USE THIS CODE FOR SOMETHING THAT YOU, YOUR EMPLOYER OR ANY OTHER
+            # HUMAN BEING RELY ON, AS IT WILL BREAK EVERYTHING!
+
+            if self.ignoreLocks:
+                tmp_dir = tempfile.mkdtemp()
+                call_makelink = "ln -s -t "+tmp_dir+" "+index+"/*"
+                call_rmlock = "rm "+tmp_dir+"/LOCK"
+                call_touchlock = "touch "+tmp_dir+"/LOCK"
+                os.system(call_makelink)
+                os.system(call_rmlock)
+                os.system(call_touchlock)
+                db_dir = tmp_dir
+            else:
+                db_dir = index
+
+            db = plyvel.DB(db_dir, compression=None)
             self.blockIndexes = [DBBlockIndex(format_hash(k[1:]), v)
                                  for k, v in db.iterator() if k[0] == ord('b')]
             db.close()
