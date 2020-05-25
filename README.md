@@ -2,7 +2,7 @@
 
 This Python 3 library is a fork of the [bitcoin-blockchain-parser](https://github.com/alecalve/python-bitcoin-blockchain-parser)
 which provides a parser for the raw data stored by bitcoind. In contrast to the original library, this fork allows 
-processes to read the lockchain data in parallel. This is particularly useful if you want to parallelize your analysis 
+processes to read the blockchain data in parallel. This is particularly useful if you want to parallelize your analysis 
 across multiple CPU cores. 
 
 **NOTE:** The database used by bitcoind (LevelDB) does not support multi-process concurrency. To "solve" that problem,
