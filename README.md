@@ -7,7 +7,7 @@ across multiple CPU cores.
 
 **NOTE:** The database used by bitcoind (LevelDB) does not support multi-process concurrency. To "solve" that problem,
 a temporary directory is created and symbolically linked to the data files for every process. Thus, each process can
-acquire a lock for his own temporary directory and simultaneous reads become possible (see 
+acquire a lock for its own temporary directory and simultaneous reads become possible (see 
 [this Stackoverflow-Answer](https://stackoverflow.com/a/23540423) for details). However, this is a terrible hack that
 will introduce significant instability to your code and it should **NEVER** be used in any productive environments.
 In particular, any attempt to perform parallel writes will result in unexpected and unpredictable behaviour and most 
